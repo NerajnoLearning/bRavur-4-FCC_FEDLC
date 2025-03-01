@@ -1,0 +1,54 @@
+@import 'variables';
+
+.calculator #button.jumbo-wide {
+    padding:  0 40px;
+
+}
+
+.calculator {
+  width: 320px;
+  margin: 50px auto;
+  border: 2px solid $primary-color;
+  border-radius: 10px;
+  padding: 20px;
+  background-color: $primary-color;
+
+  #display {
+    background-color: $secondary-color;
+    padding: 20px;
+    text-align: right;
+    font-size: 24px;
+    margin-bottom: 20px;
+    border-radius: 5px;
+    min-height: 60px;
+    word-wrap: break-word;
+  }
+
+  .calculator-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+
+    button {
+      padding: 20px;
+      font-size: 18px;
+      border: none;
+      border-radius: 5px;
+      background-color: $secondary-color;
+      cursor: pointer;
+
+      &:hover {
+        background-color: $button-hover;
+      }
+
+      &#add, &#subtract, &#multiply, &#divide, &#equals {
+        background-color: $operator-color;
+        color: white;
+      }
+
+      &#zero {
+        grid-column: span 2;
+      }
+    }
+  }
+}
