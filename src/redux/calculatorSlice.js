@@ -33,32 +33,34 @@ const calculatorSlice = createSlice({
     },
     inputOperator: (state, action) => {
       const nextOperator = action.payload;
-      const { firstOperand, display, operator, lastInputType } = state;
-      const inputValue = parseFloat(display);
+      const { firstOperand, display, operator } = state;
 
-      if (nextOperator === '-' && (lastInputType === 'operator' || display === '0')) {
-        if (display !== '-') {
-          state.display = '-';
-          state.lastInputType = 'negative';
-          return;
-        }
-      }
-
-      if (lastInputType === 'operator' && nextOperator !== '-') {
-        state.operator = nextOperator; // Replace previous operator (excluding negative sign)
+      // Special case for negative numbers
+      if (nextOperator === '-' && (!display || display === '0' || state.waitingForSecondOperand)) {
+        state.display = '-';
+        state.waitingForSecondOperand = false;
         return;
       }
 
-      if (operator && !state.waitingForSecondOperand) {
-        state.firstOperand = performCalculation(firstOperand, inputValue, operator);
-        state.display = String(state.firstOperand);
-      } else {
+      const inputValue = parseFloat(display);
+
+      // Handle consecutive operators
+      if (operator && state.waitingForSecondOperand && display !== '-') {
+        state.operator = nextOperator;
+        return;
+      }
+
+      // Normal operation flow
+      if (firstOperand === null && display !== '-') {
         state.firstOperand = inputValue;
+      } else if (operator && display !== '-') {
+        const result = performCalculation(firstOperand, inputValue, operator);
+        state.display = String(result);
+        state.firstOperand = result;
       }
 
       state.waitingForSecondOperand = true;
       state.operator = nextOperator;
-      state.lastInputType = 'operator';
     },
     calculateResult: (state) => {
       if (!state.operator || state.waitingForSecondOperand) {
@@ -85,15 +87,20 @@ const calculatorSlice = createSlice({
 });
 
 function performCalculation(firstOperand, secondOperand, operator) {
+  // Handle negative numbers
+  if (typeof secondOperand === 'string' && secondOperand === '-') {
+    secondOperand = -1;
+  }
+
   switch (operator) {
     case '+':
-      return firstOperand + secondOperand;
+      return Number((firstOperand + secondOperand).toFixed(4));
     case '-':
-      return firstOperand - secondOperand;
+      return Number((firstOperand - secondOperand).toFixed(4));
     case '*':
-      return firstOperand * secondOperand;
+      return Number((firstOperand * secondOperand).toFixed(4));
     case '/':
-      return firstOperand / secondOperand;
+      return Number((firstOperand / secondOperand).toFixed(4));
     default:
       return secondOperand;
   }
